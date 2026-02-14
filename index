@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romantic Poetry Matching Exercise - B1+/B2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #764ba2;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #764ba2;
+        }
+
+        .exercise {
+            margin-bottom: 50px;
+        }
+
+        .exercise h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .column h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .line-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .line-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .line-item.selected {
+            background: #e7eaf6;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .line-item.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .line-item.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .line-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .letter-label {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .match-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .score-display.show {
+            display: block;
+        }
+
+        .score-display .score {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 2em;
+        }
+
+        .meaning-match {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .meaning-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        .meaning-item.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .meaning-item.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .poem-text {
+            font-style: italic;
+            color: #495057;
+        }
+
+        .poet-name {
+            color: #764ba2;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .meaning-text {
+            color: #495057;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .extension {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .extension h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .matching-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .meaning-item {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💕 Romantic Poetry Matching Exercise 💕</h1>
+        <p class="subtitle">For B1+/B2 English Learners | Valentine's Day Theme</p>
+
+        <div class="instructions">
+            <strong>📚 Instructions:</strong> Complete both exercises by matching the poetry lines and their meanings. 
+            Click on items to select them, then click "Match Selected" to pair them together. 
+            Check your answers when you're done!
+        </div>
+
+        <!-- Exercise 1 -->
+        <div class="exercise" id="exercise1">
+            <h2>Exercise 1: Complete the Romantic Lines</h2>
+            <p style="margin-bottom: 20px;">Match the beginning of each famous line with its correct ending:</p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress1"></div>
+            </div>
+
+            <div class="matching-container">
+                <div class="column">
+                    <h3>Beginnings (1-15)</h3>
+                    <div id="beginnings"></div>
+                </div>
+                <div class="column">
+                    <h3>Endings (A-O)</h3>
+                    <div id="endings"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="matchSelected(1)">Match Selected</button>
+                <button onclick="clearMatches(1)">Clear All Matches</button>
+                <button onclick="checkAnswers(1)">Check Answers</button>
+                <button onclick="showAnswers(1)">Show Answers</button>
+            </div>
+
+            <div class="score-display" id="score1">
+                <div>Your Score: <span class="score" id="scoreValue1">0/15</span></div>
+                <p id="feedback1"></p>
+            </div>
+        </div>
+
+        <!-- Exercise 2 -->
+        <div class="exercise" id="exercise2">
+            <h2>Exercise 2: Match Lines to Their Meanings</h2>
+            <p style="margin-bottom: 20px;">Select the meaning that best matches each complete poetic line:</p>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress2"></div>
+            </div>
+
+            <div class="meaning-match" id="meaningMatch"></div>
+
+            <div class="button-group">
+                <button onclick="checkAnswers(2)">Check Answers</button>
+                <button onclick="showAnswers(2)">Show Answers</button>
+                <button onclick="clearMatches(2)">Reset Exercise</button>
+            </div>
+
+            <div class="score-display" id="score2">
+                <div>Your Score: <span class="score" id="scoreValue2">0/15</span></div>
+                <p id="feedback2"></p>
+            </div>
+        </div>
+
+        <div class="extension">
+            <h3>🌟 Extension Activity</h3>
+            <p>Choose your favorite line from the list. Research the full poem online, read it, and write a short paragraph (80-100 words) explaining:</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>What is the poem about?</li>
+                <li>Why did this line stand out to you?</li>
+                <li>Do you think the sentiment is still relevant today?</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Data for Exercise 1
+        const beginnings = [
+            { id: 1, text: "Shall I compare thee to a summer's day? / Thou art more lovely and..." },
+            { id: 2, text: "How do I love thee? / Let me count..." },
+            { id: 3, text: "She walks in beauty, like the night / Of cloudless climes and..." },
+            { id: 4, text: "I carry your heart with me / (I carry it..." },
+            { id: 5, text: "Come live with me and be my love, / And we will all the pleasures..." },
+            { id: 6, text: "Wild nights! Wild nights! / Were I with thee, / Wild nights should be..." },
+            { id: 7, text: "If ever two were one, then surely we. / If ever man were loved by wife, then..." },
+            { id: 8, text: "Drink to me only with thine eyes, / And I will pledge..." },
+            { id: 9, text: "Bright star, would I were steadfast as thou art— / Not in lone splendour hung aloft the night / And watching, with eternal lids apart, / Like nature's patient, sleepless..." },
+            { id: 10, text: "I ne'er was struck before that hour / With love so sudden and..." },
+            { id: 11, text: "Love set you going like a fat gold watch. / The midwife slapped your footsoles, and your bald cry / Took its place among the elements..." },
+            { id: 12, text: "When you are old and grey and full of sleep, / And nodding by the fire, take down this book, / And slowly read, and dream of..." },
+            { id: 13, text: "I loved you first: but afterwards your love / Outsoaring mine, sang such a loftier song / As drowned the friendly cooings of..." },
+            { id: 14, text: "Had we but world enough, and time, / This coyness, lady, were..." },
+            { id: 15, text: "Whoso list to hunt, I know where is an hind, / But as for me, alas, I..." }
+        ];
+
+        const endings = [
+            { id: 'A', text: "more temperate" },
+            { id: 'B', text: "the ways" },
+            { id: 'C', text: "starry skies" },
+            { id: 'D', text: "in my heart)" },
+            { id: 'E', text: "prove" },
+            { id: 'F', text: "our luxury" },
+            { id: 'G', text: "thee; / If ever wife was happy in a man" },
+            { id: 'H', text: "with mine" },
+            { id: 'I', text: "Eremite" },
+            { id: 'J', text: "so sweet" },
+            { id: 'K', text: "of day" },
+            { id: 'L', text: "the soft look your eyes had once" },
+            { id: 'M', text: "my dove" },
+            { id: 'N', text: "no crime" },
+            { id: 'O', text: "may no more" }
+        ];
+
+        const answers1 = {
+            1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H',
+            9: 'I', 10: 'J', 11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O'
+        };
+
+        // Data for Exercise 2
+        const poems = [
+            { id: 1, line: "Shall I compare thee to a summer's day? / Thou art more lovely and more temperate", poet: "William Shakespeare" },
+            { id: 2, line: "How do I love thee? / Let me count the ways", poet: "Elizabeth Barrett Browning" },
+            { id: 3, line: "She walks in beauty, like the night / Of cloudless climes and starry skies", poet: "Lord Byron" },
+            { id: 4, line: "I carry your heart with me / (I carry it in my heart)", poet: "E.E. Cummings" },
+            { id: 5, line: "Come live with me and be my love, / And we will all the pleasures prove", poet: "Christopher Marlowe" },
+            { id: 6, line: "Wild nights! Wild nights! / Were I with thee, / Wild nights should be our luxury", poet: "Emily Dickinson" },
+            { id: 7, line: "If ever two were one, then surely we. / If ever man were loved by wife, then thee", poet: "Anne Bradstreet" },
+            { id: 8, line: "Drink to me only with thine eyes, / And I will pledge with mine", poet: "Ben Jonson" },
+            { id: 9, line: "Bright star, would I were steadfast as thou art— / Not in lone splendour hung aloft the night / And watching, with eternal lids apart, / Like nature's patient, sleepless Eremite", poet: "John Keats" },
+            { id: 10, line: "I ne'er was struck before that hour / With love so sudden and so sweet", poet: "John Clare" },
+            { id: 11, line: "Love set you going like a fat gold watch. / The midwife slapped your footsoles, and your bald cry / Took its place among the elements of day", poet: "Sylvia Plath" },
+            { id: 12, line: "When you are old and grey and full of sleep, / And nodding by the fire, take down this book, / And slowly read, and dream of the soft look your eyes had once", poet: "W.B. Yeats" },
+            { id: 13, line: "I loved you first: but afterwards your love / Outsoaring mine, sang such a loftier song / As drowned the friendly cooings of my dove", poet: "Christina Rossetti" },
+            { id: 14, line: "Had we but world enough, and time, / This coyness, lady, were no crime", poet: "Andrew Marvell" },
+            { id: 15, line: "Whoso list to hunt, I know where is an hind, / But as for me, alas, I may no more", poet: "Thomas Wyatt" }
+        ];
+
+        const meanings = [
+            { id: 'A', text: "You're more beautiful than even a perfect summer day" },
+            { id: 'B', text: "Let me list all the different ways I love you" },
+            { id: 'C', text: "She has both darkness and light, perfectly balanced in her beauty" },
+            { id: 'D', text: "You are always with me; we are inseparable" },
+            { id: 'E', text: "Move in with me and we'll experience all of life's joys together" },
+            { id: 'F', text: "If I were with you, our passionate nights together would be pure bliss" },
+            { id: 'G', text: "We are the perfect example of a couple who are truly one" },
+            { id: 'H', text: "Just look at me with love and I'll return that love through my gaze" },
+            { id: 'I', text: "I wish I could be as constant as a star, but watching over you as you sleep" },
+            { id: 'J', text: "I had never experienced love at first sight until that very moment" },
+            { id: 'K', text: "A mother's love brings a child into the world and gives them life" },
+            { id: 'L', text: "When you're elderly, remember how I once loved you in your youth" },
+            { id: 'M', text: "Your love for me became greater than mine, drowning out my own voice" },
+            { id: 'N', text: "If we had unlimited time, your shyness wouldn't be a problem" },
+            { id: 'O', text: "I want to pursue this love, but I cannot continue any longer" }
+        ];
+
+        const answers2 = {
+            1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H',
+            9: 'I', 10: 'J', 11: 'K', 12: 'L', 13: 'M', 14: 'N', 15: 'O'
+        };
+
+        // State management
+        let selectedBeginning = null;
+        let selectedEnding = null;
+        let matches1 = {};
+
+        // Initialize Exercise 1
+        function initExercise1() {
+            const beginningsContainer = document.getElementById('beginnings');
+            const endingsContainer = document.getElementById('endings');
+
+            beginnings.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'line-item';
+                div.dataset.id = item.id;
+                div.innerHTML = `<span class="line-number">${item.id}</span>${item.text}`;
+                div.onclick = () => selectBeginning(item.id);
+                beginningsContainer.appendChild(div);
+            });
+
+            endings.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'line-item';
+                div.dataset.id = item.id;
+                div.innerHTML = `<span class="letter-label">${item.id}</span>${item.text}`;
+                div.onclick = () => selectEnding(item.id);
+                endingsContainer.appendChild(div);
+            });
+        }
+
+        function selectBeginning(id) {
+            document.querySelectorAll('#beginnings .line-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedBeginning = id;
+            document.querySelector(`#beginnings .line-item[data-id="${id}"]`).classList.add('selected');
+        }
+
+        function selectEnding(id) {
+            document.querySelectorAll('#endings .line-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedEnding = id;
+            document.querySelector(`#endings .line-item[data-id="${id}"]`).classList.add('selected');
+        }
+
+        function matchSelected(exercise) {
+            if (selectedBeginning && selectedEnding) {
+                matches1[selectedBeginning] = selectedEnding;
+                
+                // Update display
+                const beginningEl = document.querySelector(`#beginnings .line-item[data-id="${selectedBeginning}"]`);
+                const endingEl = document.querySelector(`#endings .line-item[data-id="${selectedEnding}"]`);
+                
+                // Remove any existing match display
+                beginningEl.querySelectorAll('.match-display').forEach(el => el.remove());
+                endingEl.querySelectorAll('.match-display').forEach(el => el.remove());
+                
+                // Add new match display
+                const matchDisplay1 = document.createElement('span');
+                matchDisplay1.className = 'match-display';
+                matchDisplay1.textContent = selectedEnding;
+                beginningEl.appendChild(matchDisplay1);
+                
+                const matchDisplay2 = document.createElement('span');
+                matchDisplay2.className = 'match-display';
+                matchDisplay2.textContent = selectedBeginning;
+                endingEl.appendChild(matchDisplay2);
+                
+                // Clear selection
+                beginningEl.classList.remove('selected');
+                endingEl.classList.remove('selected');
+                selectedBeginning = null;
+                selectedEnding = null;
+
+                updateProgress(1);
+            }
+        }
+
+        function updateProgress(exercise) {
+            if (exercise === 1) {
+                const progress = (Object.keys(matches1).length / 15) * 100;
+                document.getElementById('progress1').style.width = progress + '%';
+            } else {
+                let count = 0;
+                document.querySelectorAll('#meaningMatch select').forEach(select => {
+                    if (select.value) count++;
+                });
+                const progress = (count / 15) * 100;
+                document.getElementById('progress2').style.width = progress + '%';
+            }
+        }
+
+        function clearMatches(exercise) {
+            if (exercise === 1) {
+                matches1 = {};
+                selectedBeginning = null;
+                selectedEnding = null;
+                
+                document.querySelectorAll('#exercise1 .line-item').forEach(el => {
+                    el.classList.remove('selected', 'correct', 'incorrect');
+                    el.querySelectorAll('.match-display').forEach(display => display.remove());
+                });
+                
+                document.getElementById('score1').classList.remove('show');
+                document.getElementById('progress1').style.width = '0%';
+            } else {
+                document.querySelectorAll('#meaningMatch select').forEach(select => {
+                    select.value = '';
+                });
+                document.querySelectorAll('.meaning-item').forEach(el => {
+                    el.classList.remove('correct', 'incorrect');
+                });
+                document.getElementById('score2').classList.remove('show');
+                document.getElementById('progress2').style.width = '0%';
+            }
+        }
+
+        function checkAnswers(exercise) {
+            if (exercise === 1) {
+                let correct = 0;
+                
+                document.querySelectorAll('#exercise1 .line-item').forEach(el => {
+                    el.classList.remove('correct', 'incorrect');
+                });
+                
+                for (let beginning in matches1) {
+                    const userAnswer = matches1[beginning];
+                    const correctAnswer = answers1[beginning];
+                    const beginningEl = document.querySelector(`#beginnings .line-item[data-id="${beginning}"]`);
+                    const endingEl = document.querySelector(`#endings .line-item[data-id="${userAnswer}"]`);
+                    
+                    if (userAnswer === correctAnswer) {
+                        beginningEl.classList.add('correct');
+                        endingEl.classList.add('correct');
+                        correct++;
+                    } else {
+                        beginningEl.classList.add('incorrect');
+                        endingEl.classList.add('incorrect');
+                    }
+                }
+                
+                const scoreDisplay = document.getElementById('score1');
+                const scoreValue = document.getElementById('scoreValue1');
+                const feedback = document.getElementById('feedback1');
+                
+                scoreValue.textContent = `${correct}/15`;
+                
+                if (correct === 15) {
+                    feedback.textContent = "Perfect! You've mastered romantic poetry! 🌟";
+                } else if (correct >= 12) {
+                    feedback.textContent = "Excellent work! You have a great understanding! 💖";
+                } else if (correct >= 9) {
+                    feedback.textContent = "Good job! Keep practicing! 📚";
+                } else {
+                    feedback.textContent = "Keep trying! Review the lines and try again. 💪";
+                }
+                
+                scoreDisplay.classList.add('show');
+            } else {
+                let correct = 0;
+                const items = document.querySelectorAll('.meaning-item');
+                
+                items.forEach((item, index) => {
+                    const select = item.querySelector('select');
+                    const userAnswer = select.value;
+                    const correctAnswer = answers2[index + 1];
+                    
+                    item.classList.remove('correct', 'incorrect');
+                    
+                    if (userAnswer === correctAnswer) {
+                        item.classList.add('correct');
+                        correct++;
+                    } else if (userAnswer) {
+                        item.classList.add('incorrect');
+                    }
+                });
+                
+                const scoreDisplay = document.getElementById('score2');
+                const scoreValue = document.getElementById('scoreValue2');
+                const feedback = document.getElementById('feedback2');
+                
+                scoreValue.textContent = `${correct}/15`;
+                
+                if (correct === 15) {
+                    feedback.textContent = "Outstanding! You truly understand these romantic verses! 🌟";
+                } else if (correct >= 12) {
+                    feedback.textContent = "Wonderful! You have excellent comprehension! 💖";
+                } else if (correct >= 9) {
+                    feedback.textContent = "Well done! You're on the right track! 📚";
+                } else {
+                    feedback.textContent = "Keep working on it! Try to understand the deeper meaning. 💪";
+                }
+                
+                scoreDisplay.classList.add('show');
+            }
+        }
+
+        function showAnswers(exercise) {
+            if (exercise === 1) {
+                clearMatches(1);
+                matches1 = {...answers1};
+                
+                for (let beginning in answers1) {
+                    const ending = answers1[beginning];
+                    const beginningEl = document.querySelector(`#beginnings .line-item[data-id="${beginning}"]`);
+                    const endingEl = document.querySelector(`#endings .line-item[data-id="${ending}"]`);
+                    
+                    const matchDisplay1 = document.createElement('span');
+                    matchDisplay1.className = 'match-display';
+                    matchDisplay1.textContent = ending;
+                    beginningEl.appendChild(matchDisplay1);
+                    
+                    const matchDisplay2 = document.createElement('span');
+                    matchDisplay2.className = 'match-display';
+                    matchDisplay2.textContent = beginning;
+                    endingEl.appendChild(matchDisplay2);
+                    
+                    beginningEl.classList.add('correct');
+                    endingEl.classList.add('correct');
+                }
+                updateProgress(1);
+            } else {
+                const items = document.querySelectorAll('.meaning-item');
+                items.forEach((item, index) => {
+                    const select = item.querySelector('select');
+                    select.value = answers2[index + 1];
+                    item.classList.add('correct');
+                });
+                updateProgress(2);
+            }
+        }
+
+        // Initialize Exercise 2
+        function initExercise2() {
+            const container = document.getElementById('meaningMatch');
+            
+            poems.forEach((poem, index) => {
+                const div = document.createElement('div');
+                div.className = 'meaning-item';
+                
+                const poemDiv = document.createElement('div');
+                poemDiv.innerHTML = `
+                    <div class="poem-text">${poem.line}</div>
+                    <div class="poet-name">— ${poem.poet}</div>
+                `;
+                
+                const arrow = document.createElement('div');
+                arrow.innerHTML = '→';
+                arrow.style.textAlign = 'center';
+                arrow.style.fontSize = '1.5em';
+                arrow.style.color = '#667eea';
+                
+                const selectDiv = document.createElement('div');
+                const select = document.createElement('select');
+                select.onchange = () => updateProgress(2);
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Choose a meaning...';
+                select.appendChild(defaultOption);
+                
+                meanings.forEach(meaning => {
+                    const option = document.createElement('option');
+                    option.value = meaning.id;
+                    option.textContent = `${meaning.id}. ${meaning.text}`;
+                    select.appendChild(option);
+                });
+                
+                selectDiv.appendChild(select);
+                
+                div.appendChild(poemDiv);
+                div.appendChild(arrow);
+                div.appendChild(selectDiv);
+                container.appendChild(div);
+            });
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            initExercise1();
+            initExercise2();
+        };
+    </script>
+</body>
+</html>
